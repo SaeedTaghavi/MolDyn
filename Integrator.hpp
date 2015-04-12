@@ -10,7 +10,7 @@
 #include "Potential.hpp"
 #include <vector>
 #include <cmath>
-#include "Vector.hpp"
+#include "Vector3d.hpp"
 #include "constants.hpp"
 
 namespace MolDyn {
@@ -26,16 +26,16 @@ protected:
 	T temp;
 public:
 	Integrator(Potential<T>& p, const T& m, const T& dens, const T& tstep);
-	virtual void advance(std::vector<MTX::Vector<T> >& r,
-			std::vector<MTX::Vector<T> >& v, std::vector<MTX::Vector<T> >& f,
+	virtual void advance(std::vector<Vector3d<T> >& r,
+			std::vector<Vector3d<T> >& v, std::vector<Vector3d<T> >& f,
 			T& K, T& U, T& E, T& P, const T& len, bool rescale) = 0;
-	void forces(std::vector<MTX::Vector<T> >& r,
-			std::vector<MTX::Vector<T> >& f, T& EPOT, T& PRESS, const T& len);
-	void currentEnergy(std::vector<MTX::Vector<T> >& v, T& E, T& U, T& K,
+	void forces(std::vector<Vector3d<T> >& r,
+			std::vector<Vector3d<T> >& f, T& EPOT, T& PRESS, const T& len);
+	void currentEnergy(std::vector<Vector3d<T> >& v, T& E, T& U, T& K,
 			T& P);
-	void GaussConstraint(std::vector<MTX::Vector<T> >& v,
-			std::vector<MTX::Vector<T> >& f);
-	void rescale(std::vector<MTX::Vector<T> >& v);
+	void GaussConstraint(std::vector<Vector3d<T> >& v,
+			std::vector<Vector3d<T> >& f);
+	void rescale(std::vector<Vector3d<T> >& v);
 	T getMass() const {
 		return mass;
 	}
@@ -55,15 +55,17 @@ inline MolDyn::Integrator<T>::Integrator(Potential<T>& p, const T& m,
 }
 
 template<class T>
-inline void MolDyn::Integrator<T>::forces(std::vector<MTX::Vector<T> >& r,
-		std::vector<MTX::Vector<T> >& f, T& EPOT, T& PRESS, const T& length) {
+inline void MolDyn::Integrator<T>::forces(std::vector<Vector3d<T> >& r,
+		std::vector<Vector3d<T> >& f, T& EPOT, T& PRESS, const T& length) {
 	unsigned int n_atoms = r.size();
-	MTX::Vector<T> fi(3);
-	MTX::Vector<T> rij(3);
-	MTX::Vector<T> fij(3);
+	Vector3d<T> fi;
+	Vector3d<T> rij;
+	Vector3d<T> fij;
 	T FIJ;
 	T rijlength;
 	T U;
+
+	static int cnt = 0;
 
 	// SET FORCES ON ALL ATOMS, POTENTIAL ENERGY, AND PRESSURE TO ZERO
 	EPOT = 0;
@@ -93,7 +95,11 @@ inline void MolDyn::Integrator<T>::forces(std::vector<MTX::Vector<T> >& r,
 				potential.evaulate(rijlength, U, FIJ);
 				PRESS += FIJ * rijlength;
 				EPOT += U;
-				fij = MTX::project(FIJ, rij);
+				fij = project(FIJ, rij);
+				if (cnt < 5) {
+					std::cout << "FIJ = " << FIJ << ", fij = " << fij << std::endl;
+					++cnt;
+				}
 				fi += fij;
 				f[j] -= fij;
 			} // end if
@@ -105,7 +111,7 @@ inline void MolDyn::Integrator<T>::forces(std::vector<MTX::Vector<T> >& r,
 
 template<class T>
 inline void MolDyn::Integrator<T>::currentEnergy(
-		std::vector<MTX::Vector<T> >& v, T& E, T& U, T& K, T& P) {
+		std::vector<Vector3d<T> >& v, T& E, T& U, T& K, T& P) {
 	K = 0.0;
 	for (unsigned int i = 0; i < v.size(); ++i) {
 		K += v[i] * v[i];
@@ -117,7 +123,7 @@ inline void MolDyn::Integrator<T>::currentEnergy(
 
 template<class T>
 inline void MolDyn::Integrator<T>::GaussConstraint(
-		std::vector<MTX::Vector<T> >& v, std::vector<MTX::Vector<T> >& f) {
+		std::vector<Vector3d<T> >& v, std::vector<Vector3d<T> >& f) {
 	T denSum = 0; // Sum( pi dot F_i / m_i)
 	T numSum = 0; // Sum( pi dot P_i / m_i)
 	T lambda;
@@ -137,7 +143,7 @@ inline void MolDyn::Integrator<T>::GaussConstraint(
 }
 
 template<class T>
-inline void Integrator<T>::rescale(std::vector<MTX::Vector<T> >& v) {
+inline void Integrator<T>::rescale(std::vector<Vector3d<T> >& v) {
 	T velsq, factor;
 	velsq = 0;
 	for (unsigned int i = 0; i < v.size(); ++i) {

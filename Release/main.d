@@ -1,6 +1,6 @@
 main.d: ../main.cpp ../LJPotential.hpp ../Potential.hpp ../constants.hpp \
- ../VelocityVerlet.hpp ../Integrator.hpp ../Vector.hpp \
- ../SimulationBox.hpp ../Particle.hpp
+ ../VelocityVerlet.hpp ../Integrator.hpp ../Vector3d.hpp \
+ ../SimulationBox.hpp ../Particle.hpp ../Vector.hpp
 
 ../LJPotential.hpp:
 
@@ -12,8 +12,10 @@ main.d: ../main.cpp ../LJPotential.hpp ../Potential.hpp ../constants.hpp \
 
 ../Integrator.hpp:
 
-../Vector.hpp:
+../Vector3d.hpp:
 
 ../SimulationBox.hpp:
 
 ../Particle.hpp:
+
+../Vector.hpp:

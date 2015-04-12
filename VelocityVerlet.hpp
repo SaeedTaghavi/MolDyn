@@ -19,8 +19,8 @@ private:
 	T dt2m;
 public:
 	VelocityVerlet(Potential<T>& p, const T& m, const T& dens, const T& t);
-	void advance(std::vector<MTX::Vector<T> >& r,
-			std::vector<MTX::Vector<T> >& v, std::vector<MTX::Vector<T> >& f,
+	void advance(std::vector<Vector3d<T> >& r,
+			std::vector<Vector3d<T> >& v, std::vector<Vector3d<T> >& f,
 			T& K, T& U, T& E, T& P, const T& lbox, bool rescale);
 	virtual ~VelocityVerlet();
 };
@@ -33,8 +33,8 @@ inline MolDyn::VelocityVerlet<T>::VelocityVerlet(Potential<T>& p, const T& m,
 }
 
 template<class T>
-inline void MolDyn::VelocityVerlet<T>::advance(std::vector<MTX::Vector<T> >& r,
-		std::vector<MTX::Vector<T> >& v, std::vector<MTX::Vector<T> >& f, T& K,
+inline void MolDyn::VelocityVerlet<T>::advance(std::vector<Vector3d<T> >& r,
+		std::vector<Vector3d<T> >& v, std::vector<Vector3d<T> >& f, T& K,
 		T& U, T& E, T& P, const T& lbox, bool rescale = false) {
 	unsigned int n_atoms = r.size();
 	/*

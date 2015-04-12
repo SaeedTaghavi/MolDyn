@@ -11,9 +11,10 @@
 #include <vector>
 #include <cmath>
 #include <random>
+#include <bits/random.h>
 #include <ctime>
 #include <stdexcept>
-#include "Vector.hpp"
+#include "Vector3d.hpp"
 #include "LJPotential.hpp"
 #include "VelocityVerlet.hpp"
 #include "Particle.hpp"
@@ -25,9 +26,9 @@ template<class T>
 class SimulationBox {
 protected:
 	unsigned int n_atoms;
-	std::vector<MTX::Vector<T> > positions;
-	std::vector<MTX::Vector<T> > velocities;
-	std::vector<MTX::Vector<T> > forces;
+	std::vector<Vector3d<T> > positions;
+	std::vector<Vector3d<T> > velocities;
+	std::vector<Vector3d<T> > forces;
 	Integrator<T>& integrator;
 	T ePot;
 	T eKin;
@@ -62,11 +63,11 @@ public:
 		return eTot;
 	}
 
-	const std::vector<MTX::Vector<T> >& getForces() const {
+	const std::vector<Vector3d<T> >& getForces() const {
 		return forces;
 	}
 
-	const std::vector<MTX::Vector<T> >& getPositions() const {
+	const std::vector<Vector3d<T> >& getPositions() const {
 		return positions;
 	}
 
@@ -74,24 +75,24 @@ public:
 		return pressure;
 	}
 
-	const std::vector<MTX::Vector<T> >& getVelocities() const {
+	const std::vector<Vector3d<T> >& getVelocities() const {
 		return velocities;
 	}
 
 protected:
-	void randomVector(MTX::Vector<T>& v);
+	Vector3d<T> randomVector();
 	void addPositions();
 	void addAtom(const unsigned int& i);
-	bool overlaps(const MTX::Vector<T>& v, const unsigned int& idx);
+	bool overlaps(const Vector3d<T>& v, const unsigned int& idx);
 };
 
 template<class T>
-inline MolDyn::SimulationBox<T>::SimulationBox(const unsigned int& n, const T& d,
-		Integrator<T>& in, const T& temp, const T& l,
+inline MolDyn::SimulationBox<T>::SimulationBox(const unsigned int& n,
+		const T& d, Integrator<T>& in, const T& temp, const T& l,
 		const T& scut = 0.9) :
 		n_atoms(n), density(d), integrator(in), sigmaCut(scut), length(l), positions(
-				n, MTX::Vector<T>(3)), velocities(n, MTX::Vector<T>(3)), forces(
-				n, MTX::Vector<T>(3)) {
+				n, Vector3d<T>()), velocities(n, Vector3d<T>()), forces(n,
+				Vector3d<T>()) {
 	if (sigmaCut <= 0.0 || sigmaCut >= 1.0) {
 		throw std::out_of_range(
 				"The overlap cutoff distance is out of range (0:1).");
@@ -129,28 +130,30 @@ inline void SimulationBox<T>::initialize() {
 	}
 	std::cout << "STARTING INITIALIZATION" << std::endl;
 	// ASSIGN POSITION OF FIRST ATOM.
-	MTX::Vector<T> p(3);
-	randomVector(p);
+	Vector3d<T> p;
+	p = randomVector();
 	positions[0] = p;
-	std::cout << "INSTERTION OF MOLECULE 1" << std::endl;
+	std::cout << "INSTERTION OF MOLECULE 1: " << positions[0] << std::endl;
 	addPositions();
 }
 
 template<class T>
 inline MolDyn::SimulationBox<T>::~SimulationBox() {
 	// Free memory
-	std::vector<MTX::Vector<T> >().swap(positions);
-	std::vector<MTX::Vector<T> >().swap(velocities);
-	std::vector<MTX::Vector<T> >().swap(forces);
+	std::vector<Vector3d<T> >().swap(positions);
+	std::vector<Vector3d<T> >().swap(velocities);
+	std::vector<Vector3d<T> >().swap(forces);
 
 }
 
 template<class T>
-inline void MolDyn::SimulationBox<T>::randomVector(MTX::Vector<T>& v) {
-	for (unsigned int i = 0; i < v.getSize(); ++i) {
-		v[i] = distribution(generator) * length;
-		v[i] -= halfLength;
+inline Vector3d<T> MolDyn::SimulationBox<T>::randomVector() {
+	Vector3d<T> rdm;
+	for (unsigned int i = 0; i < 3; ++i) {
+		rdm[i] = distribution(generator) * length;
+		rdm[i] -= halfLength;
 	}
+	return rdm;
 }
 
 template<class T>
@@ -166,14 +169,14 @@ inline void MolDyn::SimulationBox<T>::step(bool rescale = false) {
 
 template<class T>
 inline void MolDyn::SimulationBox<T>::addPositions() {
-	MTX::Vector<T> p(3), dr(3), sum(3), ones(3);
+	Vector3d<T> p, dr, sum, ones;
 	ones.ones();
 	sum.zeros();
 	for (unsigned int i = 1; i < n_atoms; ++i) {
 		addAtom(i);
 		std::cout.setf(std::ios::fixed, std::ios::floatfield);
 		std::cout.precision(5);
-		std::cout << "INSTERTION OF MOLECULE " << i + 1;
+		std::cout << "INSTERTION OF MOLECULE " << i + 1 << ": " << positions[i];
 		std::cout << std::endl;
 	}
 
@@ -181,7 +184,7 @@ inline void MolDyn::SimulationBox<T>::addPositions() {
 	integrator.forces(positions, forces, ePot, pressure, length);
 	// RESCALE VELOCITIES TO (-1,1) & CALCULATE SUM OF X,Y,Z VELOCITY
 	for (unsigned int i = 0; i < n_atoms; ++i) {
-		randomVector(p);
+		p = randomVector();
 		velocities[i] = p * 2 - ones;
 		sum += velocities[i];
 	}
@@ -196,19 +199,19 @@ inline void MolDyn::SimulationBox<T>::addPositions() {
 
 template<class T>
 inline void MolDyn::SimulationBox<T>::addAtom(const unsigned int& ith) {
-	MTX::Vector<T> p(3);
+	Vector3d<T> p;
 	bool retry = true;
 	while (retry == true) {
-		randomVector(p);
+		p = randomVector();
 		retry = overlaps(p, ith);
 	}
 	positions[ith] = p;
 }
 
 template<class T>
-inline bool MolDyn::SimulationBox<T>::overlaps(const MTX::Vector<T>& v,
+inline bool MolDyn::SimulationBox<T>::overlaps(const Vector3d<T>& v,
 		const unsigned int& ith) {
-	MTX::Vector<T> dr(3);
+	Vector3d<T> dr;
 	bool result = false;
 	T sigmaCut2 = sigmaCut * sigmaCut;
 	// CALCULATE DISTANCES FROM PREVIOUSLY INSTERTED ATOMS

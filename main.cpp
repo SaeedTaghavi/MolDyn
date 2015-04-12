@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 	bool write_energies = false;
 	bool write_pressure = false;
 	unsigned int output_file_cnt = 0;
-	MTX::Vector<real> V(3);
+	MolDyn::Vector3d<real> V;
 
 	unsigned int NATOMS;
 	real EPSILON;
