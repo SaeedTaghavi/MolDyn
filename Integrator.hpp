@@ -65,8 +65,6 @@ inline void MolDyn::Integrator<T>::forces(std::vector<Vector3d<T> >& r,
 	T rijlength;
 	T U;
 
-	static int cnt = 0;
-
 	// SET FORCES ON ALL ATOMS, POTENTIAL ENERGY, AND PRESSURE TO ZERO
 	EPOT = 0;
 	PRESS = 0;
@@ -96,10 +94,6 @@ inline void MolDyn::Integrator<T>::forces(std::vector<Vector3d<T> >& r,
 				PRESS += FIJ * rijlength;
 				EPOT += U;
 				fij = project(FIJ, rij);
-				if (cnt < 5) {
-					std::cout << "FIJ = " << FIJ << ", fij = " << fij << std::endl;
-					++cnt;
-				}
 				fi += fij;
 				f[j] -= fij;
 			} // end if
