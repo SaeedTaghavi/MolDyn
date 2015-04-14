@@ -64,6 +64,7 @@ inline void MolDyn::VelocityVerlet<T>::advance(std::vector<Vector3d<T> >& r,
 	}
 
 	if (rescale) {
+//		Integrator<T>::GaussConstraint(v,f)
 		Integrator<T>::rescale(v);
 	}
 

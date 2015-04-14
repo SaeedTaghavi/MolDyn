@@ -120,18 +120,18 @@ inline void MolDyn::Integrator<T>::GaussConstraint(
 		std::vector<Vector3d<T> >& v, std::vector<Vector3d<T> >& f) {
 	T denSum = 0; // Sum( pi dot F_i / m_i)
 	T numSum = 0; // Sum( pi dot P_i / m_i)
-	T lambda;
+	T lambda = 0;
 	// Assuming m_i = mass (same for all particles)
 	for (unsigned int i = 0; i < v.size(); ++i) {
 		denSum += v[i] * v[i];
 		numSum += v[i] * f[i];
 	}
-	lambda = (denSum == 0) ? 1 : numSum / denSum;
+	lambda = (denSum == 0) ? 0.0 : numSum / denSum;
 //	std::cout << "lambda = " << lambda << std::endl;
 
 	for (unsigned int i = 0; i < v.size(); ++i) {
 		v[i] *= lambda;
-//		f[i] -= v[i] * lambda * mass;
+		f[i] -= v[i]  * mass;
 	}
 
 }

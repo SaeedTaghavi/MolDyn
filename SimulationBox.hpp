@@ -25,24 +25,85 @@ namespace MolDyn {
 template<class T>
 class SimulationBox {
 protected:
+	/*
+	 * The numner of particles in the simulation box
+	 */
 	unsigned int n_atoms;
+	/*
+	 * The positions of the particles in the simulation
+	 * box
+	 */
 	std::vector<Vector3d<T> > positions;
+	/*
+	 * The velocities of the particles in the simulation
+	 * box
+	 */
 	std::vector<Vector3d<T> > velocities;
+	/*
+	 * The force component in each of the particles
+	 */
 	std::vector<Vector3d<T> > forces;
+	/*
+	 * The integrator to be used (e.g. Velocity Verlet)
+	 * Used by reference to decrease memory usage
+	 */
 	Integrator<T>& integrator;
+	/*
+	 * The potential energy of the simulation box
+	 */
 	T ePot;
+	/*
+	 * The kinetic energy of the simulation box
+	 */
 	T eKin;
+	/*
+	 * The total energy of the simulation box
+	 */
 	T eTot;
+	/*
+	 * The computed pressure
+	 */
 	T pressure;
+	/*
+	 * The density of the simulation box
+	 */
 	T density;
+	/*
+	 * The length of the simulation box
+	 */
 	T length;
+	/*
+	 * Half the length of the simulation box
+	 * (stored for some calculations)
+	 */
 	T halfLength;
+	/*
+	 * The sigma cutoff length. Used to determine the
+	 * overlap between partiles.
+	 */
 	T sigmaCut;
+	/*
+	 * The long range corrections to the energy
+	 */
 	T ELRC;
+	/*
+	 * The long range corrections to the potential
+	 */
 	T PLRC;
+	/*
+	 * The seed of the random number generator
+	 */
 	unsigned int seed;
 	//std::default_random_engine generator;
+	/*
+	 * The Mersenne Twister random number generation
+	 */
 	std::mt19937 generator;
+	/*
+	 * The uniform distribution generator
+	 * Used to generate a uniform distribution of real
+	 * numbers in the range (0.0-1.0]
+	 */
 	std::uniform_real_distribution<T> distribution;
 public:
 	SimulationBox(const unsigned int& n, const T& d, Integrator<T>& in,
@@ -102,6 +163,9 @@ inline MolDyn::SimulationBox<T>::SimulationBox(const unsigned int& n,
 
 	std::cout << "Simulation box length = " << length << std::endl;
 
+	/*
+	 * Calculate and store the long range corrections
+	 */
 	ELRC = integrator.potential.getELRC(n_atoms, density);
 	PLRC = integrator.potential.getPLRC(density);
 
@@ -111,16 +175,33 @@ inline MolDyn::SimulationBox<T>::SimulationBox(const unsigned int& n,
 	sigmaCut *= integrator.potential.getSigma();
 	std::cout << "Sigma cut = " << sigmaCut << std::endl;
 
+	/*
+	 * Get the seed as the epoch time in milliseconds
+	 */
 	seed = time(NULL);
 	//generator = std::default_random_engine(seed);
+	/*
+	 * Feed the seed to the Mersenne Twister generator
+	 */
 	generator = std::mt19937(seed);
+	/*
+	 * Feed the generator to the uniform distribution
+	 */
 	distribution = std::uniform_real_distribution<T>(0.0, 1.0);
+	/*
+	 * Store the initial temperature
+	 */
 	integrator.setTemp(temp);
 
 }
 
 template<class T>
 inline void SimulationBox<T>::initialize() {
+	/*
+	 * Determine if the size of the system is smaller than the
+	 * allowed potential cutoff length and throw an exception if
+	 * it does.
+	 */
 	if (!integrator.potential.validateCutoff(halfLength)) {
 		std::cout << "******** WARNING: LJCUT > L/2 ********" << std::endl;
 		std::cout << "LJCUT = " << integrator.potential.getCutOff()
@@ -128,12 +209,20 @@ inline void SimulationBox<T>::initialize() {
 		std::cout << "******** STOPPING  SIMULATION ********" << std::endl;
 		throw std::logic_error("Invalid LJCUT");
 	}
+
+	/*
+	 * Insert the first atom randomly
+	 */
 	std::cout << "STARTING INITIALIZATION" << std::endl;
 	// ASSIGN POSITION OF FIRST ATOM.
 	Vector3d<T> p;
 	p = randomVector();
 	positions[0] = p;
 	std::cout << "INSTERTION OF MOLECULE 1: " << positions[0] << std::endl;
+
+	/*
+	 * Then add the rest using the overlap check
+	 */
 	addPositions();
 }
 
@@ -149,6 +238,10 @@ inline MolDyn::SimulationBox<T>::~SimulationBox() {
 template<class T>
 inline Vector3d<T> MolDyn::SimulationBox<T>::randomVector() {
 	Vector3d<T> rdm;
+	/*
+	 * Generate the random vector with coordinates x,y,z
+	 * in the range [-halfLength:halfLength]
+	 */
 	for (unsigned int i = 0; i < 3; ++i) {
 		rdm[i] = distribution(generator) * length;
 		rdm[i] -= halfLength;
@@ -172,6 +265,9 @@ inline void MolDyn::SimulationBox<T>::addPositions() {
 	Vector3d<T> p, dr, sum, ones;
 	ones.ones();
 	sum.zeros();
+	/*
+	 * Add the positions of the remaining particles
+	 */
 	for (unsigned int i = 1; i < n_atoms; ++i) {
 		addAtom(i);
 		std::cout.setf(std::ios::fixed, std::ios::floatfield);
@@ -185,7 +281,7 @@ inline void MolDyn::SimulationBox<T>::addPositions() {
 	// RESCALE VELOCITIES TO (-1,1) & CALCULATE SUM OF X,Y,Z VELOCITY
 	for (unsigned int i = 0; i < n_atoms; ++i) {
 		p = randomVector();
-		velocities[i] = p * 2 - ones;
+		velocities[i] = p * 2.0 - ones;
 		sum += velocities[i];
 	}
 	// ZERO THE TOTAL LINEAR MOMENTUM BY REMOVING/ADDING MOMENTUM
@@ -201,10 +297,16 @@ template<class T>
 inline void MolDyn::SimulationBox<T>::addAtom(const unsigned int& ith) {
 	Vector3d<T> p;
 	bool retry = true;
+	/*
+	 * If the random position overlaps get a new random position
+	 */
 	while (retry == true) {
 		p = randomVector();
 		retry = overlaps(p, ith);
 	}
+	/*
+	 * Else store the vector in the desired position
+	 */
 	positions[ith] = p;
 }
 
@@ -219,6 +321,11 @@ inline bool MolDyn::SimulationBox<T>::overlaps(const Vector3d<T>& v,
 		dr = v;
 		dr -= positions[i];
 		dr.modulo(length);
+		/*
+		 * If the (squared) magnitude is less than
+		 * the (squared) sigma cutoff then the particle overlaps
+		 * with a previously inserted one
+		 */
 		if ((dr * dr) < sigmaCut2) {
 			result = true;
 			break;
