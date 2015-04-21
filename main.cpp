@@ -17,7 +17,6 @@
 #include "Component.hpp"
 #include "constants.hpp"
 
-#define SCUTOFF 0.9
 #define MAXSHELLS 100
 
 typedef double real;
@@ -94,7 +93,7 @@ int main(int argc, char **argv) {
 	}
 
 	MolDyn::SimulationBox<real> simulationBox(config.totalParticles, integrator,
-			config.temperature, simBoxLength, SCUTOFF, config.maxComponents);
+			config.temperature, simBoxLength, config.sigmaCut, config.maxComponents);
 	for (unsigned int i = 0; i < config.maxComponents; ++i) {
 		simulationBox.addComponent(config.components[i]);
 	}

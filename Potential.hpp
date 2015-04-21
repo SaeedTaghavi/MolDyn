@@ -13,6 +13,8 @@ namespace MolDyn {
 
 template<class T>
 class Potential {
+public:
+	T cutoffBlowsAt;
 protected:
 	T cutOff;
 	T ELRC, PLRC;

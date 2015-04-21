@@ -36,6 +36,8 @@
 		<dt>0.002</dt>
 		<!-- The Lennard-Jones Cutoff distance (times sigma) -->
 		<LJCut>2.5</LJCut>
+		<!-- The initial particle overlap (SCUTOFF) -->
+		<overlap>0.9</overlap>
 		<!-- The number of equilibration steps -->
 		<equilibrationSteps>10000</equilibrationSteps>
 		<!-- The number of productions steps -->

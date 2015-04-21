@@ -213,6 +213,7 @@ template<class T>
 inline bool MixedLJPotential<T>::validateCutoff(const T& length) {
 	for (unsigned int i = 0; i < maxComponents; ++i) {
 		if (Potential<T>::cutOff * sigma[i] >= length) {
+			Potential<T>::cutoffBlowsAt = Potential<T>::cutOff * sigma[i];
 			return false;
 		}
 	}

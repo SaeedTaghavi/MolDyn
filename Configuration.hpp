@@ -24,6 +24,7 @@
 #define IENERGY		1
 #define ITAPE		100
 #define IANIMATE	100
+#define OVERLAP		0.9
 
 namespace MolDyn {
 
@@ -49,6 +50,7 @@ public:
 	T temperature;
 	T dt;
 	T LJCutoff;
+	T sigmaCut;
 	unsigned int equilibrationSteps;
 	unsigned int productionSteps;
 	unsigned int energyInterval;
@@ -158,14 +160,15 @@ inline Configuration<T>::Configuration(const std::string &filename) :
 	}
 
 	/* Read the general parameters */
-	temperature = pt.get("params.temperature", TEMP);
-	dt = pt.get("params.dt", DT);
-	LJCutoff = pt.get("params.LJCut", LJCUT);
-	equilibrationSteps = pt.get("params.equilibrationSteps", EQSTEPS);
-	productionSteps = pt.get("params.productionSteps", PRODSTEPS);
-	energyInterval = pt.get("params.energyInterval", IENERGY);
-	tapeInterval = pt.get("params.tapeInterval", ITAPE);
-	animationInterval = pt.get("params.animationInterval", IANIMATE);
+	temperature = pt.get("config.parameters.temperature", TEMP);
+	dt = pt.get("config.parameters.dt", DT);
+	LJCutoff = pt.get("config.parameters.LJCut", LJCUT);
+	equilibrationSteps = pt.get("config.parameters.equilibrationSteps", EQSTEPS);
+	productionSteps = pt.get("config.parameters.productionSteps", PRODSTEPS);
+	energyInterval = pt.get("config.parameters.energyInterval", IENERGY);
+	tapeInterval = pt.get("config.parameters.tapeInterval", ITAPE);
+	animationInterval = pt.get("config.parameters.animationInterval", IANIMATE);
+	sigmaCut = pt.get("config.parameters.overlap",OVERLAP);
 }
 
 template<class T>

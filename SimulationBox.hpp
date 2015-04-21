@@ -227,7 +227,7 @@ inline void SimulationBox<T>::initialize() {
 	 */
 	if (!integrator.potential.validateCutoff(halfLength)) {
 		std::cout << "******** WARNING: LJCUT > L/2 ********" << std::endl;
-		std::cout << "LJCUT = " << integrator.potential.getCutOff()
+		std::cout << "LJCUT = " << integrator.potential.cutoffBlowsAt
 				<< ",   L/2  = " << halfLength << std::endl;
 		std::cout << "******** STOPPING  SIMULATION ********" << std::endl;
 		throw std::logic_error("Invalid LJCUT");
