@@ -1,21 +1,28 @@
-main.d: ../main.cpp ../LJPotential.hpp ../Potential.hpp ../constants.hpp \
- ../VelocityVerlet.hpp ../Integrator.hpp ../Vector3d.hpp \
- ../SimulationBox.hpp ../Particle.hpp ../Vector.hpp
+main.d: ../main.cpp ../Configuration.hpp ../Component.hpp \
+ ../constants.hpp ../Output.hpp ../SimulationBox.hpp ../Vector3d.hpp \
+ ../LJPotential.hpp ../Potential.hpp ../VelocityVerlet.hpp \
+ ../Integrator.hpp ../MixedLJPotential.hpp ../SymmetricMatrix.hpp
+
+../Configuration.hpp:
+
+../Component.hpp:
+
+../constants.hpp:
+
+../Output.hpp:
+
+../SimulationBox.hpp:
+
+../Vector3d.hpp:
 
 ../LJPotential.hpp:
 
 ../Potential.hpp:
 
-../constants.hpp:
-
 ../VelocityVerlet.hpp:
 
 ../Integrator.hpp:
 
-../Vector3d.hpp:
+../MixedLJPotential.hpp:
 
-../SimulationBox.hpp:
-
-../Particle.hpp:
-
-../Vector.hpp:
+../SymmetricMatrix.hpp:

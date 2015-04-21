@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<!-- The name of the output files -->
+	<files>
+		<positions>TAPE_POS.dat</positions>
+		<velocities>TAPE_VEL.dat</velocities>
+		<movie>MOVIE.xyz</movie>
+		<energies>ENERGIES.dat</energies>
+		<pressure>PRESSURE.dat</pressure>
+	</files>
+	<!-- Each component should have it's own sigma, epsilon, mass, density and 
+		number of particles. -->
+	<components>
+		<component>
+			<sigma>3.73</sigma> <!-- In Angstrom -->
+			<epsilon>148</epsilon><!-- Times KB -->
+			<mass>16.04</mass><!-- In atomic mass units -->
+			<density>0.24</density><!-- In g/cm3 -->
+			<particles>100</particles><!-- The number of particles -->
+			<identifier>H</identifier><!-- A string identfying the species -->
+		</component>
+		<component>
+			<sigma>3.73</sigma>
+			<epsilon>148</epsilon>
+			<mass>16.04</mass>
+			<density>0.24</density>
+			<particles>100</particles>
+			<identifier>He</identifier>
+		</component>
+	</components>
+	<!-- The global simulation parameters -->
+	<parameters>
+		<!-- The INITIAL temperature in Kelvin -->
+		<temperature>150</temperature>
+		<!-- The time step in ps -->
+		<dt>0.002</dt>
+		<!-- The Lennard-Jones Cutoff distance (times sigma) -->
+		<LJCut>2.5</LJCut>
+		<!-- The number of equilibration steps -->
+		<equilibrationSteps>10000</equilibrationSteps>
+		<!-- The number of productions steps -->
+		<productionSteps>50000</productionSteps>
+		<!-- The step interval at which energies will be written -->
+		<energyInterval>1</energyInterval>
+		<!-- The step interval at which positions and velocities will be written -->
+		<tapeInterval>100</tapeInterval>
+		<!-- The step interval at which movie frames will be written -->
+		<animationInterval>100</animationInterval>
+	</parameters>
+</config>
