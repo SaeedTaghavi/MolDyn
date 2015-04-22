@@ -1,2 +1,2 @@
 # MolDyn
-A simple molecular dynamics box exersise 
+A simple molecular dynamics box exercise 
